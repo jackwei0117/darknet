@@ -1,0 +1,4 @@
+﻿  to_json.cpp
+c:\users\raven\desktop\darknet-master\to_json\to_json.cpp(41): warning C4018: '<': signed/unsigned mismatch
+  to_json.vcxproj -> C:\Users\raven\Desktop\darknet-master\to_json\to_json\Debug\to_json.exe
+  to_json.vcxproj -> C:\Users\raven\Desktop\darknet-master\to_json\to_json\Debug\to_json.pdb (Partial PDB)

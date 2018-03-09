@@ -21,7 +21,10 @@
 #include "http_stream.h"
 #endif
 #endif
-
+//////////////////////////
+static int frame_number;
+float areaRatio = 0.0005;
+//////////////////////////
 int windows = 0;
 
 float colors[6][3] = { {1,0,1}, {0,0,1},{0,1,1},{0,1,0},{1,1,0},{1,0,0} };
@@ -230,6 +233,17 @@ void draw_detections(image im, int num, float thresh, box *boxes, float **probs,
             if(right > im.w-1) right = im.w-1;
             if(top < 0) top = 0;
             if(bot > im.h-1) bot = im.h-1;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			//post validation
+			float boxWidth = right - left;
+			float boxHeight = bot - top;
+			int iboxWidth = right - left;
+			int iboxHeight = bot - top;
+			if ((boxWidth / boxHeight) > 1.5 || (boxHeight / boxWidth) > 1.5 || boxWidth*boxHeight < areaRatio* im.h* im.w)
+				continue;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
             draw_box_width(im, left, top, right, bot, width, red, green, blue);
             if (alphabet) {
@@ -244,7 +258,10 @@ void draw_detections(image im, int num, float thresh, box *boxes, float **probs,
 void draw_detections_cv(IplImage* show_img, int num, float thresh, box *boxes, float **probs, char **names, image **alphabet, int classes)
 {
 	int i;
-
+//////////////////////////////////
+	int  count = 0, length = 0;
+	char bbox_result[1000];
+//////////////////////////////////
 	for (i = 0; i < num; ++i) {
 		int class_id = max_index(probs[i], classes);
 		float prob = probs[i][class_id];
@@ -281,6 +298,17 @@ void draw_detections_cv(IplImage* show_img, int num, float thresh, box *boxes, f
 			if (top < 0) top = 0;
 			if (bot > show_img->height - 1) bot = show_img->height - 1;
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//post validation
+			float boxWidth = right - left;
+			float boxHeight = bot - top;
+			int iboxWidth = right - left;
+			int iboxHeight = bot - top;
+			if ((boxWidth / boxHeight) > 1.5 || (boxHeight / boxWidth) > 1.5 || boxWidth*boxHeight < areaRatio* show_img->height* show_img->width)
+				continue;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 			float const font_size = show_img->height / 1000.F;
 			CvPoint pt1, pt2, pt_text, pt_text_bg1, pt_text_bg2;
 			pt1.x = left;
@@ -307,8 +335,21 @@ void draw_detections_cv(IplImage* show_img, int num, float thresh, box *boxes, f
 			CvFont font;
 			cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, font_size, font_size, 0, font_size * 3, 8);	
 			cvPutText(show_img, names[class_id], pt_text, &font, black_color);
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			sprintf(bbox_result + strlen(bbox_result), "%d,%d,%d,%d,%d;", class_id, left, top, iboxWidth, iboxHeight);
+			count++;
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 		}
 	}
+///////////////////////////////////////////////////////////////////
+	frame_number++;
+	if (count > 0)
+	{
+		FILE *file = fopen("bbox_temp.txt", "a+");
+		fprintf(file, "%d\n%s\n\n", frame_number, bbox_result);
+		fclose(file);
+	}
+///////////////////////////////////////////////////////////////////
 }
 
 IplImage* draw_train_chart(float max_img_loss, int max_batches, int number_of_lines, int img_size)

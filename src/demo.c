@@ -15,7 +15,9 @@
 #include <sys/time.h>
 #endif
 
-#define FRAMES 3
+//////////////////////////////////
+#define FRAMES 1
+//////////////////////////////////
 
 #ifdef OPENCV
 #include "opencv2/highgui/highgui_c.h"
@@ -63,6 +65,7 @@ void *fetch_in_thread(void *ptr)
 	in = get_image_from_stream_resize(cap, net.w, net.h, &in_img);
     if(!in.data){
         //error("Stream closed.");
+		system("to_json.exe");
 		flag_exit = 1;
 		return;
     }
@@ -147,6 +150,15 @@ void demo(char *cfgfile, char *weightfile, float thresh, int cam_index, const ch
     }
 
     if(!cap) error("Couldn't connect to webcam.\n");
+
+///////////////////////////////////////////////////////////////////////////////////////////
+	double fps_info = cvGetCaptureProperty(cap, CV_CAP_PROP_FPS);
+	int width_info = (int)cvGetCaptureProperty(cap, CV_CAP_PROP_FRAME_WIDTH);
+	int height_info = (int)cvGetCaptureProperty(cap, CV_CAP_PROP_FRAME_HEIGHT);
+	FILE *file = fopen("bbox_temp.txt", "w+");
+	fprintf(file, "%s\n%f\n%d\n%d\n", filename, fps_info, width_info, height_info);
+	fclose(file);
+///////////////////////////////////////////////////////////////////////////////////////////
 
     layer l = net.layers[net.n-1];
     int j;
