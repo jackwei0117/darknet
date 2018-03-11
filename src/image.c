@@ -349,6 +349,12 @@ void draw_detections_cv(IplImage* show_img, int num, float thresh, box *boxes, f
 		fprintf(file, "%d\n%s\n\n", frame_number, bbox_result);
 		fclose(file);
 	}
+	else
+	{
+		FILE *file = fopen("bbox_temp.txt", "a+");
+		fprintf(file, "%d\n\n\n", frame_number);
+		fclose(file);
+	}
 ///////////////////////////////////////////////////////////////////
 }
 
