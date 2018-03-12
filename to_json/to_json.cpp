@@ -24,12 +24,12 @@ void main()
 
 
 	ifstream in("bbox_temp.txt");
-	string path, fps, bbox_temp, width, height;
+	string path, fps, bbox_temp, width, height,buf;
 	in >> path;
 	in >> fps;
 	in >> width;
 	in >> height;
-
+	getline(in, buf);
 
 
 	vector<string> temp;
@@ -57,23 +57,43 @@ void main()
 
 
 	string resolution = width + '*' + height;
-	string items, frame_number, rois;
+	string items, frame_number, rois,next,empty;
+	
 
 	//do first time for putting ',' at right place
 	if (!in.eof())
 	{
-		in >> frame_number;
-		in >> rois;
-		items = items + "				 { \"frame_number\":\"" + ZeroPadNumber(frame_number) + ".jpg\", \n"
-			          + "				   \"RoIs\":\"" + rois + "\"}\n";
+		getline(in, frame_number);
+		getline(in, rois);
+		getline(in, empty);
+		if  (rois.length()>1)
+		{	
+			items = items + "				 { \"frame_number\":\"" + ZeroPadNumber(frame_number) + ".jpg\",\n"
+				+ "				   \"RoIs\":\"" + rois + "\"}\n";
+		}
+		else
+		{
+			items = items + "				 { \"frame_number\":\"" + ZeroPadNumber(frame_number) + ".jpg\",\n"
+				+ "				   \"RoIs\":\"" + "\"}\n";
+		}
     }
 
 	while ( !in.eof()) {
 
-		in >> frame_number;
-		in >> rois;
-		items = items + "				 ,{ \"frame_number\":\"" + ZeroPadNumber(frame_number) + ".jpg\",\n"
-					  +	"				   \"RoIs\":\"" + rois + "\"}\n";
+		getline(in, frame_number);
+		getline(in, rois);
+		getline(in, empty);
+		if (rois.length()>0)
+		{
+			items = items + "				 ,{ \"frame_number\":\"" + ZeroPadNumber(frame_number) + ".jpg\",\n"
+				+ "				   \"RoIs\":\"" + rois + "\"}\n";
+		}
+		else
+		{
+			items = items + "				 ,{ \"frame_number\":\"" + ZeroPadNumber(frame_number) + ".jpg\",\n"
+				+ "				   \"RoIs\":\"" + "\"}\n";
+		}
+
 	}
 	in.close();
 
